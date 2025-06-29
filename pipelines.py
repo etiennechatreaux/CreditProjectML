@@ -70,93 +70,93 @@ def get_preprocessor(onehot_cols, mapping, negative_cols, model_type='nn'):
 #_______________________________________________________________
 #_______________________________________________________________
 
-def get_randomforest_pipeline(onehot_cols, mapping, negative_cols, imbalance_method='none', hyperparameters=None):
-    default_rf_params = {
-        'n_estimators': 100,
-        'max_depth': 10,
-        'min_samples_split': 5,
-        'min_samples_leaf': 2,
-        'random_state': 0
-    }
+# def get_randomforest_pipeline(onehot_cols, mapping, negative_cols, imbalance_method='none', hyperparameters=None):
+#     default_rf_params = {
+#         'n_estimators': 100,
+#         'max_depth': 10,
+#         'min_samples_split': 5,
+#         'min_samples_leaf': 2,
+#         'random_state': 0
+#     }
     
-    if hyperparameters:
-        default_rf_params.update(hyperparameters)
+#     if hyperparameters:
+#         default_rf_params.update(hyperparameters)
     
-    preprocessor = get_preprocessor(onehot_cols, mapping, negative_cols, model_type='rf')
+#     preprocessor = get_preprocessor(onehot_cols, mapping, negative_cols, model_type='rf')
     
-    if imbalance_method == 'balanced':
-        # Use class_weight='balanced' to handle imbalance
-        rf_classifier = RandomForestClassifier(
-            class_weight='balanced',
-            **default_rf_params
-        )
-        pipeline = Pipeline([
-            ('preprocessor', preprocessor),
-            ('classifier', rf_classifier)
-        ])
+#     if imbalance_method == 'balanced':
+#         # Use class_weight='balanced' to handle imbalance
+#         rf_classifier = RandomForestClassifier(
+#             class_weight='balanced',
+#             **default_rf_params
+#         )
+#         pipeline = Pipeline([
+#             ('preprocessor', preprocessor),
+#             ('classifier', rf_classifier)
+#         ])
         
-    elif imbalance_method == 'undersampling':
-        rf_classifier = RandomForestClassifier(**default_rf_params)
-        # Preprocessor needs to be applied before undersampling
-        preprocessed_pipeline = Pipeline([('preprocessor', preprocessor)])
-        pipeline = ImbPipeline([
-            ('preprocessed', preprocessed_pipeline),
-            ('undersampler', RandomUnderSampler(random_state=0)),
-            ('classifier', rf_classifier)
-        ])
-    elif imbalance_method == 'smote':
-        rf_classifier = RandomForestClassifier(**default_rf_params)
-        pipeline = ImbPipeline([
-            ('preprocessor', preprocessor),
-            ('smote', SMOTE(random_state=0)),
-            ('classifier', rf_classifier)
-        ])
+#     elif imbalance_method == 'undersampling':
+#         rf_classifier = RandomForestClassifier(**default_rf_params)
+#         # Preprocessor needs to be applied before undersampling
+#         preprocessed_pipeline = Pipeline([('preprocessor', preprocessor)])
+#         pipeline = ImbPipeline([
+#             ('preprocessed', preprocessed_pipeline),
+#             ('undersampler', RandomUnderSampler(random_state=0)),
+#             ('classifier', rf_classifier)
+#         ])
+#     elif imbalance_method == 'smote':
+#         rf_classifier = RandomForestClassifier(**default_rf_params)
+#         pipeline = ImbPipeline([
+#             ('preprocessor', preprocessor),
+#             ('smote', SMOTE(random_state=0)),
+#             ('classifier', rf_classifier)
+#         ])
         
-    else:  
-        # Classic RF without any imbalance handling
-        rf_classifier = RandomForestClassifier(**default_rf_params)
-        pipeline = Pipeline([
-            ('preprocessor', preprocessor),
-            ('classifier', rf_classifier)
-        ])
+#     else:  
+#         # Classic RF without any imbalance handling
+#         rf_classifier = RandomForestClassifier(**default_rf_params)
+#         pipeline = Pipeline([
+#             ('preprocessor', preprocessor),
+#             ('classifier', rf_classifier)
+#         ])
     
-    return pipeline
+#     return pipeline
 
 
 
 
 
-def evaluate_pipeline(pipeline, X_train, X_test, y_train, y_test, method_name):
+# def evaluate_pipeline(pipeline, X_train, X_test, y_train, y_test, method_name):
     
-    pipeline.fit(X_train, y_train)
+#     pipeline.fit(X_train, y_train)
     
-    y_pred = pipeline.predict(X_test)
-    y_pred_proba = pipeline.predict_proba(X_test)[:, 1]
+#     y_pred = pipeline.predict(X_test)
+#     y_pred_proba = pipeline.predict_proba(X_test)[:, 1]
     
-    results = {}
-    results['classification_report'] = classification_report(y_test, y_pred)
-    results['confusion_matrix'] = confusion_matrix(y_test, y_pred)
-    results['roc_auc'] = roc_auc_score(y_test, y_pred_proba)
-    precision, recall, _ = precision_recall_curve(y_test, y_pred_proba)
-    results['pr_auc'] = auc(recall, precision)
+#     results = {}
+#     results['classification_report'] = classification_report(y_test, y_pred)
+#     results['confusion_matrix'] = confusion_matrix(y_test, y_pred)
+#     results['roc_auc'] = roc_auc_score(y_test, y_pred_proba)
+#     precision, recall, _ = precision_recall_curve(y_test, y_pred_proba)
+#     results['pr_auc'] = auc(recall, precision)
     
-    cv_scores = cross_val_score(
-        pipeline, X_train, y_train, 
-        cv=StratifiedKFold(n_splits=3, shuffle=True, random_state=1),
-        scoring='roc_auc'
-    )
-    results['cv_mean'] = cv_scores.mean()
-    results['cv_std'] = cv_scores.std()
+#     cv_scores = cross_val_score(
+#         pipeline, X_train, y_train, 
+#         cv=StratifiedKFold(n_splits=3, shuffle=True, random_state=1),
+#         scoring='roc_auc'
+#     )
+#     results['cv_mean'] = cv_scores.mean()
+#     results['cv_std'] = cv_scores.std()
     
-    print(f"\n{'='*50}")
-    print(f"RESULTS - {method_name}")
-    print(f"{'='*50}")
-    print(f"ROC AUC: {results['roc_auc']:.4f}")
-    print(f"Precision-Recall AUC: {results['pr_auc']:.4f}")
-    print(f"CV Mean: {results['cv_mean']:.4f} (+/- {results['cv_std']*2:.4f})")
-    print("\nClassification Report:")
-    print(results['classification_report'])
-    print("\nConfusion Matrix:")
-    print(results['confusion_matrix'])
+#     print(f"\n{'='*50}")
+#     print(f"RESULTS - {method_name}")
+#     print(f"{'='*50}")
+#     print(f"ROC AUC: {results['roc_auc']:.4f}")
+#     print(f"Precision-Recall AUC: {results['pr_auc']:.4f}")
+#     print(f"CV Mean: {results['cv_mean']:.4f} (+/- {results['cv_std']*2:.4f})")
+#     print("\nClassification Report:")
+#     print(results['classification_report'])
+#     print("\nConfusion Matrix:")
+#     print(results['confusion_matrix'])
     
-    return results, pipeline
+#     return results, pipeline
